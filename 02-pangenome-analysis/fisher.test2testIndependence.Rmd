@@ -1,0 +1,49 @@
+---
+title: "Test of independence using fisher-exact test on 2-way contigency table"
+output: html_document
+---
+
+```{r, warning=FALSE, null_prefix=FALSE}
+rawcount<-read.table("countCOG-input4Statistical-test.txt", header = T, check.names = F,sep="\t")
+
+# For comparison between core genes and 
+number = length(rawcount$`COG category`)
+cogid = seq(1, number, 1)
+
+# fisher.test(matrix(c(46, 646, 2, 121), ncol = 2))
+for (i in cogid){
+  testreportD <- fisher.test(matrix(c(rawcount$`Core gene`[i], sum(rawcount$`Core gene`), 
+           rawcount$`Accessory gene`[i], sum(rawcount$`Accessory gene`)), ncol = 2))
+  print(paste(i, as.vector(rawcount$`COG category`[i]), sep = '. '), quote = FALSE)
+  print(testreportD$p.value)
+  rawcount$Core2accessory_pValue[i] = testreportD$p.value
+  rawcount$Core2accessory_FDR[i] = rawcount$Core2accessory_pValue[i] * 23
+}
+
+
+for (i in cogid){
+  testreportU <- fisher.test(matrix(c(rawcount$`Core gene`[i], sum(rawcount$`Core gene`), 
+           rawcount$`Strain-specific gene`[i], sum(rawcount$`Strain-specific gene`)), ncol = 2))
+  print(paste(i, as.vector(rawcount$`COG category`[i]), sep = '. '), quote = FALSE)
+  print(testreportU$p.value)
+  rawcount$Core2Unique_pValue[i] = testreportU$p.value
+  rawcount$Core2Unique_FDR[i] = rawcount$Core2Unique_pValue[i] * 23
+}
+
+
+for (i in cogid){
+  testreportU <- fisher.test(matrix(c(rawcount$`Accessory gene`[i], sum(rawcount$`Accessory gene`), 
+           rawcount$`Strain-specific gene`[i], sum(rawcount$`Strain-specific gene`)), ncol = 2))
+  print(paste(i, as.vector(rawcount$`COG category`[i]), sep = '. '), quote = FALSE)
+  print(testreportU$p.value)
+  rawcount$Accessory2Unique_pValue[i] = testreportU$p.value
+  rawcount$Accessory2Unique_FDR[i] = rawcount$Accessory2Unique_pValue[i] * 23
+}
+
+
+write.table(rawcount, sep="\t",row.names=FALSE, quote = FALSE, file="./FisherTest-COG-betweenstats.txt")
+
+
+```
+
+fisher.test(matrix(c(629, 72088, 13, 5485), ncol = 2))
